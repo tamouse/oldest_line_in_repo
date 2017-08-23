@@ -24,12 +24,30 @@ module OldestLineInRepo
           $stderr.write e
           raise "Error running #{cmd}"
         end
-        o
+        o.split("\n")
       end
     end
 
     def blame(file)
       Rugged::Blame.new(repo, file)
+    end
+
+    def oldest_line_in_file(blame_data)
+      blame_data.min_by do |x|
+        x[:final_signature][:time]
+      end
+    end
+
+    def oldest_lines_in_repo
+      git_files.map do |file|
+        oldest_line_in_file(blame(file))
+      end
+    end
+
+    def oldest_file_in_repo
+      oldest_lines_in_repo.min_by do |x|
+        x[:final_signature][:time]
+      end
     end
 
   end

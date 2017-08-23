@@ -1,3 +1,7 @@
 #!/usr/bin/env ruby
 
 require "oldest_line_in_repo"
+oldest_file = ::OldestLineInRepo::Ops.new.oldest_file_in_repo
+puts "Path: " + oldest_file[:orig_path]
+puts "Date: " + oldest_file[:final_signature][:time].ctime
+puts "Start line: " + oldest_file[:final_start_line_number].to_s

@@ -2,6 +2,7 @@ require "test_helper"
 
 class OldestLineInRepoTest < Minitest::Test
   def setup
+    @test_file = 'oldest_line_in_repo.gemspec'
     @project_root = File.expand_path('../../', __FILE__)
     @bogus_root = File.expand_path(File.dirname(__FILE__))
     @ops = ::OldestLineInRepo::Ops.new(@project_root)
@@ -22,10 +23,8 @@ class OldestLineInRepoTest < Minitest::Test
   end
 
   def test_git_files
-    file_list = @ops.git_files
-    refute_nil file_list
-    files = file_list.split("\n")
-    assert_includes(files, 'oldest_line_in_repo.gemspec')
+    files = @ops.git_files
+    assert_includes(files, @test_file)
   end
 
   def test_failing_git_files
@@ -38,10 +37,28 @@ class OldestLineInRepoTest < Minitest::Test
   end
 
   def test_blame
-    blame_data = @ops.blame('oldest_line_in_repo.gemspec')
-    refute_nil blame_data
-    require "byebug"; byebug
-    assert_kind_of Hash, blame_data, blame_data.inspect
+    blame_data = @ops.blame(@test_file)
+    assert_kind_of Rugged::Blame, blame_data, blame_data.inspect
+  end
+
+  def test_oldest_line_in_file
+    blame_data = @ops.blame(@test_file)
+    oldest = @ops.oldest_line_in_file(blame_data)
+    assert_kind_of Hash, oldest, oldest.inspect
+    assert_equal oldest[:final_signature][:time].strftime("%F-%H-%M"), "2017-08-23-09-07"
+  end
+
+  def test_oldest_lines_in_repo
+    oldest = @ops.oldest_lines_in_repo
+    assert_kind_of Array, oldest
+    assert_equal oldest.count, @ops.git_files.count
+  end
+
+  def test_oldest_file_in_repo
+    oldest = @ops.oldest_file_in_repo
+    assert_kind_of Hash, oldest
+    binding.pry
+    assert_equal oldest[:final_signature][:time].strftime("%F-%H-%M"), "2017-08-23-09-07"
   end
 
 
