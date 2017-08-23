@@ -1,0 +1,3 @@
+#!/usr/bin/env ruby
+
+require "oldest_line_in_repo"
