@@ -1,9 +1,10 @@
 
 module OldestLineInRepo
   class Ops
-    attr_accessor :repo_root, :repo
+    attr_accessor :repo_root, :repo, :options
 
-    def initialize(repo_root='.')
+    def initialize(repo_root='.', options={})
+      self.options = options
       self.repo_root = repo_root
       self.repo = open_repo(repo_root)
     end
@@ -43,8 +44,9 @@ module OldestLineInRepo
 
     def oldest_file_in_repo
       oldest_lines_in_repo.min_by do |x|
+        print '.' if options[:progress]
         x[:final_signature][:time]
-      end
+      end.tap{|x| puts ''}
     end
 
   end
